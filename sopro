@@ -1,0 +1,65 @@
+wait(1)
+print("ESP - Script Cycled Successfully! ✅") -- This will print the message in brackets every 1 second to indicate the script is working and updating constantly.
+
+-- Function to create the highlight and label for each player
+local function applyHighlightAndLabel(player)
+    local character = player.Character
+    if not character then return end
+    
+    -- Create Highlight
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = character
+    
+    -- Ensure the highlight is always visible, no matter the distance
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    
+    -- Set highlight color based on team
+    if player.Team then
+        highlight.FillColor = player.Team.TeamColor.Color
+        highlight.OutlineColor = player.Team.TeamColor.Color
+    else
+        highlight.FillColor = BrickColor.new("Bright red").Color
+        highlight.OutlineColor = BrickColor.new("Bright red").Color
+    end
+    
+    -- Create BillboardGui for the username and team name
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Parent = character:FindFirstChild("Head")
+    billboardGui.Size = UDim2.new(0, 200, 0, 50)
+    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+    billboardGui.AlwaysOnTop = true
+    
+    -- Create TextLabel inside BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboardGui
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.new(1, 1, 1) -- White color for text
+    textLabel.TextStrokeTransparency = 0.5
+    textLabel.Font = Enum.Font.Ubuntu -- Change font to Ubuntu
+    textLabel.TextScaled = true
+    
+    -- Set TextLabel content
+    local teamName = player.Team and player.Team.Name or "No Team"
+    textLabel.Text = player.Name .. " [" .. teamName .. "]"
+end
+
+-- Function to apply the highlight and label to each player when they join
+local function onPlayerAdded(player)
+    -- Wait until the player's character is added
+    player.CharacterAdded:Connect(function(character)
+        applyHighlightAndLabel(player)
+    end)
+    
+    -- Apply highlight and label to already loaded characters
+    if player.Character then
+        applyHighlightAndLabel(player)
+    end
+end
+
+-- Connect the function to all existing players
+game.Players.PlayerAdded:Connect(onPlayerAdded)
+
+-- Apply to all current players already in the game
+for _, player in pairs(game.Players:GetPlayers()) do
+    onPlayerAdded(player)
